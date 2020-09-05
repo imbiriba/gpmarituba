@@ -14,11 +14,13 @@ function stro = unravel2(dat)
 % str.ob(:).variable(:).description
 %
 % B.I. 2019.08.01
+% B.I. 2020.09.05 - added utime - a quick fix. 
 
 
 for ii=1:numel(dat.station.ob)
   if(numel(dat.station.ob)>1)
     stro.ob(ii).time = dat.station.ob{ii}.Attributes.time;
+    stro.ob(ii).utime = dat.station.ob{ii}.Attributes.utime;
     for jj=1:numel(dat.station.ob{ii}.variable)
       stro.ob(ii).variable(jj).description = dat.station.ob{ii}.variable{jj}.Attributes.description;
       stro.ob(ii).variable(jj).value = dat.station.ob{ii}.variable{jj}.Attributes.value;

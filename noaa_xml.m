@@ -12,6 +12,7 @@ function [data val] = noaa_xml(station, nhours)
 % val  - all variables present in the TAF station report.
 %
 % B.I. - 2019.06.04
+% B.I. - 2020.09.05 - using utime instead of time - this is UTC
 
 fname='';
 if(nargin()==0)
@@ -42,10 +43,6 @@ dat = xml2struct(fname);
 %str = unravel(dat); % for xml2struct.m in MATLAB repo
 str = unravel2(dat); % for my own xml2struct.m
 
-for ii=1:numel(str.ob)
-  disp([str.ob(ii).time ' Speed = ' num2str(str.ob(ii).variable(6).value) ' Angle = ' num2str(str.ob(ii).variable(4).value)]);
-end
-
 
 
 % Get all variables of interest:
@@ -56,11 +53,14 @@ varname = { 'temp'    'dewp'    'relh'    'direction'    'windcard'    'wind'   
 
 
 
-
 % Grab data
 for ii=1:numel(str.ob)
-  val.time(ii) = datenum(str.ob(ii).time);
-  
+  % get UTC from UTIME - unix time
+  utc_utime = str2double(str.ob(ii).utime);
+  val.utime(ii) = datenum(1970,1,1,0,0,utc_utime);
+
+  disp(['UTC utime=' datestr(val.utime(ii)) '. Speed = ' num2str(str.ob(ii).variable(6).value) '. Angle = ' num2str(str.ob(ii).variable(4).value)]);
+   
   thisvar = {str.ob(ii).variable.description};
 
   for jj=1:numel(variables)
@@ -76,16 +76,16 @@ end
 %  speed, direction, insolation, cloud, sunset hour.
 % Keep only integer hours:
 disp('Keeping only INTEGER hours');
-hours = 24*(val.time-floor(val.time));
+hours = 24*(val.utime-floor(val.utime));
 ikeep = find(round(100*hours)/100==round(hours));
-data.time = val.time(ikeep)';
+data.utime = val.utime(ikeep)';
 data.temp = str2num(char(val.temp{ikeep}));
 data.temp = (data.temp-32)*5/9;
 data.wdir = str2num(char(val.direction{ikeep}));
 data.wspd = str2num(char(val.wind{ikeep}));
 data.wspd = data.wspd*1.6/3.6;
 [data.okta, data.cldh] = taf_metar2okta(val.clouds(ikeep));
-hour = (val.time(ikeep) - floor(val.time(ikeep)))*24;
+hour = (val.utime(ikeep) - floor(val.utime(ikeep)))*24;
 data.sunset = (hour==7 | hour == 5)';
 
 end

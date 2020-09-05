@@ -7,6 +7,9 @@ function lgrdata = get_lgr_data(lgrdatafiles, lgrdatadelay)
 % lgrdatafiles - cell array with ggaDDMMMAAA_fxxxx.txt  files.
 % lgrdatadelay - cell array with time delays in seconds. 
 %
+% Reported time is whatever is contained in datafiles. 
+% Usually local time (computer clock).
+%
 % B. I. 08/2019.
 
   if(nargin()==0)

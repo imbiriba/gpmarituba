@@ -1,8 +1,8 @@
-function meteodata = get_meteo_data(meteodatafiles)
-% function meteodata = get_meteo_data(meteodatafiles)
+function meteodata = get_meteo_data(meteodatafiles,TZ)
+% function meteodata = get_meteo_data(meteodatafiles,TZ)
 %
 % Read NOAA Meteorologica data (from airport stations).
-%
+% TZ = time zone in hours from GMT
 % Output:
 %     meteodata.mtime 		- time is local time by default
 %     meteodata.duration        - Time width of validity (1hr)
@@ -15,6 +15,7 @@ function meteodata = get_meteo_data(meteodatafiles)
  
   if(~exist('meteodatafiles')) 
     meteodatafiles = {'data/NOAA_SBBE_19nov19.xml','data/NOAA_SBBE_30jul19_19aug19.xml'};
+    TZ=-3.0;
   end
 
   meteodata = struct( 'mtime',[], 'duration',[], 'temp',[], 'wdir',[], 'wspd',[], 'okta',[], 'cldh',[], 'sunset',[]);
@@ -23,9 +24,9 @@ function meteodata = get_meteo_data(meteodatafiles)
     [data val] = noaa_xml(meteodatafiles{in});
 
     % variables are: time, temp, wdir, wspd, okta, sunset
-    npt = numel(data.time); 
-    meteodata.mtime(end+1:end+npt)   = data.time;
-    meteodata.duration(end+1:end+npt)= 3600*ones(size(data.time)); % In seconds
+    npt = numel(data.utime); 
+    meteodata.mtime(end+1:end+npt)   = data.utime+TZ/24;
+    meteodata.duration(end+1:end+npt)= 3600*ones(size(data.utime)); % In seconds
     meteodata.temp(end+1:end+npt)    = data.temp;
     meteodata.wdir(end+1:end+npt)    = data.wdir;
     meteodata.wspd(end+1:end+npt)    = data.wspd;

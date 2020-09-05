@@ -1,13 +1,13 @@
-function trackdata = get_track_data(trackdatafiles)
-% function trackdata = get_track_data(trackdatafiles)
+function trackdata = get_track_data(trackdatafiles, TZ)
+% function trackdata = get_track_data(trackdatafiles, TZ)
 % 
 % Read GeoTracker data files.  (from the cellphone app)
 %
-% Output:
-%     trackdata.mtime{:}  - one cell for each track file
-%     trackdata.lat{:}    - time is corrected from UTC to BELEM time. (-3)
-%     trackdata.lon{:}
-%     trackdata.alt{:}
+% Output:		  - One cell for each track file
+%     trackdata.mtime{:}  - Time in provided TZ timezone.
+%     trackdata.lat{:}    - lat/lon/alt: 'gx:coord' field.
+%     trackdata.lon{:}    - All from kml-like file generated
+%     trackdata.alt{:}      from geotracker kml output.
 %
 % B.I. 2019.10.xx
   
@@ -21,6 +21,7 @@ function trackdata = get_track_data(trackdatafiles)
     'data/7_de_ago_de_2019_9_29_58_PM',
     'data/8_de_ago_de_2019_1_02_57_AM',
     'data/19_de_nov_de_2019_11_14_43_PM'};
+  TZ = -3.0;
   end
 
   say('Loading geotrack data files')
@@ -38,7 +39,7 @@ function trackdata = get_track_data(trackdatafiles)
 %
 
 
-  trackdata.mtime = mtg;
+  trackdata.mtime = mtg+TZ./24;;
   trackdata.lat = lat;
   trackdata.lon = lon;
   trackdata.alt = alt;
