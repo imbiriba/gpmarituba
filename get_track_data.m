@@ -40,6 +40,7 @@ function trackdata = get_track_data(trackdatafiles, TZ)
 
 
   trackdata.mtime = mtg+TZ./24;;
+  trackdata.TZ = TZ;
   trackdata.lat = lat;
   trackdata.lon = lon;
   trackdata.alt = alt;

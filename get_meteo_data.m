@@ -20,19 +20,23 @@ function meteodata = get_meteo_data(meteodatafiles,TZ)
 
   meteodata = struct( 'mtime',[], 'duration',[], 'temp',[], 'wdir',[], 'wspd',[], 'okta',[], 'cldh',[], 'sunset',[]);
 
+  hour = @(x) nearest((x-floor(x)).*24.0);
   for in=1:numel(meteodatafiles)
     [data val] = noaa_xml(meteodatafiles{in});
 
     % variables are: time, temp, wdir, wspd, okta, sunset
     npt = numel(data.utime); 
-    meteodata.mtime(end+1:end+npt)   = data.utime+TZ/24;
+    meteodata.mtime(end+1:end+npt)   = data.utime+TZ./24.0;
     meteodata.duration(end+1:end+npt)= 3600*ones(size(data.utime)); % In seconds
     meteodata.temp(end+1:end+npt)    = data.temp;
     meteodata.wdir(end+1:end+npt)    = data.wdir;
     meteodata.wspd(end+1:end+npt)    = data.wspd;
     meteodata.okta(end+1:end+npt)    = data.okta;
     meteodata.cldh(end+1:end+npt)    = data.cldh;
-    meteodata.sunset(end+1:end+npt)  = data.sunset;
+    hh = hour(data.utime+TZ./24.0); 
+    meteodata.sunset(end+1:end+npt)  = (hh==17 | hh==18);
   end
+
+  meteodata.TZ = TZ;
 end
 

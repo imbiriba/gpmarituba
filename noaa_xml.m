@@ -13,6 +13,7 @@ function [data val] = noaa_xml(station, nhours)
 %
 % B.I. - 2019.06.04
 % B.I. - 2020.09.05 - using utime instead of time - this is UTC
+%                     do not estimate sunset.
 
 fname='';
 if(nargin()==0)
@@ -85,7 +86,7 @@ data.wdir = str2num(char(val.direction{ikeep}));
 data.wspd = str2num(char(val.wind{ikeep}));
 data.wspd = data.wspd*1.6/3.6;
 [data.okta, data.cldh] = taf_metar2okta(val.clouds(ikeep));
-hour = (val.utime(ikeep) - floor(val.utime(ikeep)))*24;
-data.sunset = (hour==7 | hour == 5)';
+%hour = (val.utime(ikeep) - floor(val.utime(ikeep)))*24;
+%data.sunset = (hour==7 | hour == 5)';
 
 end

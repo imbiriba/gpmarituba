@@ -45,7 +45,7 @@ for iv=1:nvec
   sm = num2str(uvec(iv,2),'%02d');
 
   fname = fullfile(sdir, [rname '_' sy '_' sm '.csv']);
-
+  disp(fname)
   % final list counter
   ik=0; list=[];
   if(exist(fname))
@@ -71,7 +71,11 @@ for iv=1:nvec
       dat = csvread(fname);
     end 
     % Select hours of interest
-    datatime = datenum(dat(:,1:6));
+    if(strcmp(source,'inmet-belem'))
+      datatime = str.mtime;
+    else
+      datatime = datenum(dat(:,1:6));
+    end
     for ih=1:numel(mtime)
       % find data points close (less or equal than one hour) to the requested time
       [dt iok] = min(abs(mtime(ih)-datatime));

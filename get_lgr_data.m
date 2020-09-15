@@ -1,4 +1,4 @@
-function lgrdata = get_lgr_data(lgrdatafiles, lgrdatadelay)
+function lgrdata = get_lgr_data(lgrdatafiles, lgrdatadelay, lrgTZ)
 % function lgrdata = get_lgr_data(lgrdatafiles, lgrdatadelay)
 % 
 % Concatenate given LGR data files into a single structure of data
@@ -6,9 +6,15 @@ function lgrdata = get_lgr_data(lgrdatafiles, lgrdatadelay)
 %
 % lgrdatafiles - cell array with ggaDDMMMAAA_fxxxx.txt  files.
 % lgrdatadelay - cell array with time delays in seconds. 
+% lgrTZ        - data timezone (scalar)
 %
-% Reported time is whatever is contained in datafiles. 
-% Usually local time (computer clock).
+% Reported time is whatever is contained in datafiles,
+% (usually local time - computer clock), but
+% lgrTZ can be used to tag times with a given TZ. 
+% No adjustment is done.
+%
+% 
+% Defaults are for Marituba's run (2019).
 %
 % B. I. 08/2019.
 
@@ -39,7 +45,10 @@ function lgrdata = get_lgr_data(lgrdatafiles, lgrdatadelay)
       4,
       4,
       18};
-  else
+
+    lgrTZ = -3.0; 
+
+else
     if(numel(lgrdatafiles)~=numel(lgrdatadelay))
       error('lgrdatafiles and lgrdatadelay must have the same length');
     end
@@ -54,5 +63,8 @@ function lgrdata = get_lgr_data(lgrdatafiles, lgrdatadelay)
     lgrdata.mtime(end+1:end+npt) = mtime - lgrdatadelay{iff}/3600/24;
     lgrdata.data(:,end+1:end+npt) = data;
   end
+
+  lgrdata.TZ = lgrTZ;
+
 end
 
