@@ -1,12 +1,12 @@
 function [rx ry rc] = minipath_compute(xx, yy, cc, fn, s, docells, averaging)
 % function [rx ry rc] = minipath_compute(xx, yy, cc, fn, s, docells, averaging)
 % 
-% Use the predefines "minipath" path and agregate provided data into it.
+% Use predefined "minipath" pathes and agregate provided data into it.
 % xx, yy - define the x and y coordinates of data points (path or area). 
 % cc     - defines the quantity to be aggregated.
 % fn     - is the function performing the aggregation (@mean or @max);
 %    (- optionals -)
-% s      - grid spacing (default 50m)
+% s      - path discretization spacing (default 50m)
 % docells- logical, is TRUE, return variables are cell arrays for each minipath.
 % averaging - radius of data aggregation (default 100m). Usefull for model data;
 %
@@ -33,9 +33,10 @@ if(nargin()<=5)
   docells=false;
 end
 if(nargin()<=6)
-  averaging = 100;
+  averaging = 50;
 end
 
+% Compute pathes with grid spacing 's'
 [paths NN] = get_pathes(s);
 
 %keyboard
@@ -49,9 +50,9 @@ if(nz<10)
 end
 val = cc; 
 
-% Compute distance of a point "z" to a particupar path.
+% Compute distance of a point "z" to a particular path.
 for ii=1:numel(NN)
-  distpaths{ii} = min(abs(paths{ii}.'*ones(1,nz)-ones(NN(ii),1)*z),[],1);
+  [distpaths{ii}] = min(abs(paths{ii}.'*ones(1,nz)-ones(NN(ii),1)*z),[],1);
   vpaths{ii} = zeros(size(paths{ii}));
 end
 
@@ -82,7 +83,11 @@ for ii=1:numel(NN)
     dataused{ii} = [dataused{ii} zp(ikkc)];
     %vpathsavg{ii}(ix) = mean(val(ik(ikk)));
     %vpathsmax{ii}(ix) = max(val(ik(ikk)));
-    vpathsmax{ii}(ix) = fn(val(ik(ikkc)));
+    if(numel(ikkc)==0)
+      vpathsmax{ii}(ix) = NaN;
+    else
+      vpathsmax{ii}(ix) = fn(val(ik(ikkc)));
+    end
   end
   if(numel(zpaths)~=numel(vpathsmax))
     error('Inconsistent lengths!');
@@ -276,38 +281,45 @@ function [paths NN] = get_pathes(s)
 end
 
 function run_test()
-
+%keyboard
     flat = @(x) x(:);
-    XX=[-10000:50:10000];
-    YY=XX;
-    [PPM1 PPM2] = ndgrid(XX,YY);
-    nn = size(XX,2);
-    ch4 = flat(PPM1);
-    xx = flat(XX'*ones(1,nn));
-    yy = flat(ones(nn,1)*YY);
-    [rx,ry,rch4] = minipath_compute(xx', yy', ch4', @max);
-    figure;
-    scatter(rx,ry,20,rch4,'f');
-    title('Area - X')
-    ch4 = flat(PPM2);
-    [rx,ry,rch4] = minipath_compute(xx', yy', ch4', @max);
-    figure;
-    title('Area - Y');
-    scatter(rx,ry,20,rch4,'f');
+    x=[-5000:50:5000];
+    y=x;
+    [XX YY] = meshgrid(x,y);
+    PPMX = abs(cos(XX/1000*2*pi));
+    PPMY = abs(cos(YY/1000*2*pi));
+    figure; pcolor(XX,YY,PPMX); shading flat; title('Area data - X'); 
+    [rx,ry,rcx] = minipath_compute(flat(XX)', flat(YY)', flat(PPMX)', @max, 50, false, 55);
+    caxis([0 1]);
+    figure
+    scatter(rx,ry,20,rcx,'f'); title('Road collect - X');
+    caxis([0 1]);
+    
+    figure; pcolor(XX,YY,PPMY); shading flat; title('Area data - Y'); 
+    caxis([0 1]);
+    [rx,ry,rcy] = minipath_compute(flat(XX)', flat(YY)', flat(PPMY)', @max);
+    figure
+    scatter(rx,ry,20,rcy,'f'); title('Road collect - Y');
+    caxis([0 1]);
 
+    % Make path data
     [paths NN] = get_pathes(10);
     xx=[]; yy=[];
     for ii=1:numel(paths)
       xx = [xx real(paths{ii})];
       yy = [yy imag(paths{ii})];
     end
-    [rx ry rc] = minipath_compute(xx, yy, xx,@max);
+    ch4 = abs(cos(xx/1000*2*pi));
+    [rx ry rc] = minipath_compute(xx, yy, ch4,@max);
     figure;
+    scatter(rx,ry,20,rc,'f');
+    caxis([0 1]);
     title('Line - X');
-    scatter(rx,ry,20,rc,'f');
-    [rx ry rc] = minipath_compute(xx, yy, yy,@max);
+    ch4 = abs(cos(yy/1000*2*pi));
+    [rx ry rc] = minipath_compute(xx, yy, ch4,@max);
     figure;
-    title('Line - Y');
     scatter(rx,ry,20,rc,'f');
+    caxis([0 1]);
+    title('Line - Y');
 
 end
