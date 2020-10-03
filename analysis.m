@@ -46,33 +46,6 @@ elseif(~exist('sections'))
   load('sections.mat')
 end
 
-%figure
-%subplot(3,1,1)
-%hold on
-%for is=1:numel(sections)
-%  plot(sections(is).sbbe.wdir, sections(is).itv.wdir,'.')
-%end
-%plot([22 34],[22 34]);
-%plot([0 360],[0 360]);
-%subplot(3,1,2)
-%hold on
-%for is=1:numel(sections)
-%  plot(sections(is).sbbe.wdir, sections(is).inmet.wdir,'.')
-%end
-%plot([22 34],[22 34]);
-%plot([0 360],[0 360]);
-%subplot(3,1,3)
-%hold on
-%for is=1:numel(sections)
-%  plot(sections(is).itv.wdir, sections(is).inmet.wdir,'.')
-%end
-%plot([22 34],[22 34]);
-%plot([0 360],[0 360]);
-%
-
-
-
-
 
 
 if(~exist('plumes.mat','file'))
@@ -95,21 +68,40 @@ if(~exist('plumes.mat','file'))
   for is=1:numel(sections)
     plumes(is) = compute_plume(sections(is),is,source);
   end
+  for is=1:numel(sections)
+    % convert simulated micrograms to ppmv and add time
+    plumes(is).PPM = plumes(is).DT.*1400;
+    plumes(is).mtime = sections(is).sbbe.mtime;
+    plumes(is).source = source;
+  end
   save('plumes.mat','plumes');
 elseif(~exist('plumes'))
   load('plumes.mat');
 end
 
 
-for is=1:numel(plumes)
-  % convert simulated micrograms to ppmv
-  plumes(is).PPM = plumes(is).DT.*1400;
-  plumes(is).mtime = sections(is).sbbe.mtime;
+% Analysis
+% 1. Compute data on tracks
+% Interpolate plume data into observation points
+%
+for is=1:numel(sections)
+  [ppmc_trk] = interp2(plumes(is).Xg, plumes(is).Yg, plumes(is).PPM, sections(is).trackdata.XX, sections(is).trackdata.YY);
+  trackcalc(is).YY = sections(is).trackdata.YY;
+  trackcalc(is).XX = sections(is).trackdata.XX;
+  trackcalc(is).PPM = ppmc_trk;
 end
 
+% 2. Attempt to adjust wind angle based on bias minimization
+
+if(~exist('trackcalc_adj.mat'))
+  angle_adjust;
+  save('trackcalc_adj.mat','trackcalc');
+else
+  load('trackcalc_adj.mat');
+end
 
 return
-make_plots(sections,plumes)
+make_plots(sections,plumes,trackcalc)
 
 
 

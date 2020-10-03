@@ -59,7 +59,7 @@ function plume = compute_plume(section,is,source)
     end
     say(['Running plume ' num2str(is) ' with data: ' num2str([data.stacks, data.height(1), data.observation_height]) ' ' num2str(numel(source.Q)) ' sources and ' num2str(numel(section.itv.wdir)) ' wind directions.']);
 
-    [DT, XX, YY, ZZ] = gaussian_plume_model_fun(data);
+    [DT, XX, YY, ZZ, OUT] = gaussian_plume_model_fun(data);
 
     plume.XX = [-data.xlim:data.dxy:data.xlim];
     plume.YY = [-data.xlim:data.dxy:data.xlim];
@@ -68,5 +68,6 @@ function plume = compute_plume(section,is,source)
     plume.Yg = YY;
     plume.Zg = ZZ;
     plume.DT = DT;
+    plume.OUT = OUT;
 
 end
