@@ -100,6 +100,9 @@ else
   load('trackcalc_adj.mat');
 end
 
+sul='';
+make_stats;
+
 return
 make_plots(sections,plumes,trackcalc)
 
