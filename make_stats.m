@@ -8,10 +8,16 @@ iCH4d=7;
 makeall = true;
 makejoin = false;
 
+if(~exist('sul'))
+  error('Sulfix "sul" varibale not set.');
+end
+statfile = ['statall' sul '.txt'];
+figall   = ['figall' sul '.png'];
+statfile = ['statfile' sul '.txt'];
+
 iplumes = [2 5 7 8 11 12 14 15 16 21 22];
 
 if(makeall)
-  statfile = 'statall.txt';
   fh = fopen(statfile,'w');
 
   [~,iptm] = sort([plumes(iplumes).mtime]-floor([plumes(iplumes).mtime]));
@@ -41,6 +47,9 @@ if(makeall)
     %title({datestr(plumes(is).mtime),[ ' stab=' num2str(plumes(is).OUT.stability) ' id=' num2str(is) ' \theta=' num2str(trackcalc(is).anglefix/pi*180) ' a=' num2str(C(2),2) ]});
     title(datestr(plumes(is).mtime,'HHPM'),'FontWeight','normal');
     grid;
+    oo=max(sections(is).lgrdata.data(iCH4d,ikeep)-ch4b);
+    axis([0 oo*1.1 0 C(2)*oo*1.1+C(1)]);
+    %{
     hh = nearest((plumes(is).mtime-floor(plumes(is).mtime))*24);
     switch hh
       case 19
@@ -66,7 +75,7 @@ if(makeall)
       case 16
 	axis([0 1.5 0 0.15]);
     end
-
+%}
     set(gcf,'PaperPosition',[0.2500 6 7.5000 4.7500],'PaperUnits','inches');
 
 
@@ -75,12 +84,11 @@ if(makeall)
     fprintf(fh,['Time=' datestr(plumes(is).mtime,'HHPM') ' date=' datestr(plumes(is).mtime) ' angle=' num2str(trackcalc(is).anglefix/pi*180) '° cprev=' num2str(trackcalc(is).ccprev) ' cnew=' num2str(trackcalc(is).ccnew) ' c/o=' num2str(C(2),2) ' stab=' num2str(plumes(is).OUT.stability) 10]);
    
   end
-  print(gcf,'figall.png','-dpng','-r300');
+  print(gcf,figall,'-dpng','-r300');
   fclose(fh);
 end
 
 if(makejoin)
-  statfile = 'statfile.txt';
 
   fh = fopen(statfile,'w');
 
